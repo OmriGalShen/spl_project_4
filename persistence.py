@@ -1,22 +1,22 @@
 import atexit
 import sqlite3
-import dto
 import dbtools
+
 
 # The Repository
 class _Repository:
     def __init__(self):
         self._conn = sqlite3.connect('grades.db')
-        self.students = dbtools.Dao(dto.Student,self._conn)
-        self.assignments = dbtools.Dao(dto.Assignment,self._conn)
-        self.grades = dbtools.Dao(dto.Grade,self._conn)
+        self.students = _Students(self._conn)
+        self.assignments = _Assignments(self._conn)
+        self.grades = _Grades(self._conn)
 
     def _close(self):
         self._conn.commit()
         self._conn.close()
 
     def create_tables(self):
-        self._conn.executescript("""
+        _conn.executescript("""
         CREATE TABLE students (
             id      INT         PRIMARY KEY,
             name    TEXT        NOT NULL
