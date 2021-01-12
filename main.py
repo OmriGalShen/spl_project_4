@@ -1,16 +1,35 @@
-# This is a sample Python script.
+from persistence import repo
+import dto
+import dbtools
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+import os
+import imp
 
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print_hi('PyCharm')
+    print("hellow world!")
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+
+def grade(assignments_dir, assignment_num):
+    expected_output = repo.assignments.find(assignment_num).expected_output
+
+    for assignment in os.listdir(assignments_dir):
+        (student_id, ext) = os.path.splitext(assignment)
+
+        code = imp.load_source('test', assignments_dir + '/' + assignment)
+
+        student_grade = dto.Grade(student_id, assignment_num, 0)
+        if code.run_assignment() == expected_output:
+            student_grade.grade = 100
+
+        repo.grades.insert(student_grade)
+
+
+def print_grades():
+    print('grades:')
+    for grade in repo.grades.find_all():
+        student = repo.students.find(grade.student_id)
+
+        print('grade of student {} on assignment {} is {}'.format(student.name, grade.assignment_num, grade.grade))
+
