@@ -63,13 +63,21 @@ class _Suppliers:
 
         return Supplier(*c.fetchone())
 
-    def getID(self, name):
+    def get_id(self, name):
         c = self._conn.cursor()
         c.execute("""
                 SELECT id FROM suppliers WHERE name = ?
             """, [name])
 
         return int(*c.fetchone())
+
+    def get_logistic(self, name):
+        c = self._conn.cursor()
+        c.execute("""
+                SELECT logistic FROM suppliers WHERE name = ?
+            """, [name])
+
+        return str(*c.fetchone())
 
 
 class _Clinics:
@@ -114,12 +122,12 @@ class _Logistics:
 
         return Logistic(*c.fetchone())
 
-    def increase_count_received(self, name, amount):
+    def increase_count_received(self, logistic_id, amount):
         self._conn.execute("""
                 UPDATE logistics 
                 SET count_received = count_received + (?)
-                WHERE name = (?)
-           """, [amount, name])
+                WHERE id = (?)
+           """, [amount, logistic_id])
 
     def increase_count_send(self, name, amount):
         self._conn.execute("""
