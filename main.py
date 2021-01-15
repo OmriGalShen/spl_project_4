@@ -1,3 +1,5 @@
+import os
+
 from persistence import repo
 from dto import Vaccine, Supplier, Clinic, Logistic
 import sys
@@ -30,8 +32,8 @@ def read_config_file(path):
                 continue
 
 
-def read_orders_file(path):
-    with open(path) as order_file:
+def read_orders_file(orders_path, output_path):
+    with open(orders_path) as order_file:
         for line in order_file:
             curr_line = line.split(',')
             if len(curr_line) == 3:  # Receive Shipment
@@ -41,9 +43,11 @@ def read_orders_file(path):
                 logistic_id = repo.suppliers.get_logistic(name)
                 repo.vaccines.insert(Vaccine(0, date, supplier_id, amount))
                 repo.logistics.increase_count_received(logistic_id, amount)
+                update_output(output_path)
             elif len(curr_line) == 2:  # Send Shipment
                 location, amount = curr_line[0], int(curr_line[1])
                 print("Send Shipment")
+                update_output(output_path)
             else:
                 continue
 
@@ -54,21 +58,24 @@ def write_output_file(path, line_arg):
         output_file.write(output_line)
 
 
+def update_output(path):
+    inventory = repo.vaccines.total_inventory()
+    demand = repo.clinics.total_demand()
+    received = repo.logistics.total_received()
+    send = repo.logistics.total_sent()
+    write_output_file(path, [inventory, demand, received, send])
+
+
 if __name__ == '__main__':
     if len(sys.argv) < 4:
         print("Paths not supplied")
         pass
-    config_path, order_path, output_path = sys.argv[1:]
-    print("hello world!")
+    config_path, orders_path, output_path = sys.argv[1:]
     repo.create_tables()
     read_config_file(config_path)
-    read_orders_file(order_path)
+    read_orders_file(orders_path, output_path)
     # print(f"current: {repo.vaccines.find(1).quantity}")
     # repo.vaccines.take(1, 20)
     # print(f"current: {repo.vaccines.find(1).quantity}")
     # repo.vaccines.add(1, 30)
     # print(f"current: {repo.vaccines.find(1).quantity}")
-
-    write_output_file(output_path, [1, 1, 1, 1])
-    write_output_file(output_path, [1, 2, 3, 4])
-    write_output_file(output_path, [5, 6, 7, 8])

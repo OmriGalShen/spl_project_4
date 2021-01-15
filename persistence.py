@@ -45,6 +45,13 @@ class _Vaccines:
 
         return amount
 
+    def total_inventory(self):
+        c = self._conn.cursor()
+        c.execute("""
+            SELECT SUM(quantity) FROM vaccines
+        """)
+        return int(*c.fetchone())
+
 
 class _Suppliers:
     def __init__(self, conn):
@@ -104,6 +111,13 @@ class _Clinics:
                 WHERE location = ?
            """, [amount, location])
 
+    def total_demand(self):
+        c = self._conn.cursor()
+        c.execute("""
+            SELECT SUM(demand) FROM clinics
+        """)
+        return int(*c.fetchone())
+
 
 class _Logistics:
     def __init__(self, conn):
@@ -135,6 +149,20 @@ class _Logistics:
                 SET count_sent = count_sent + (?)
                 WHERE name = (?)
            """, [amount, name])
+
+    def total_received(self):
+        c = self._conn.cursor()
+        c.execute("""
+            SELECT SUM(count_received) FROM logistics
+        """)
+        return int(*c.fetchone())
+
+    def total_sent(self):
+        c = self._conn.cursor()
+        c.execute("""
+            SELECT SUM(count_sent) FROM logistics
+        """)
+        return int(*c.fetchone())
 
 
 # The Repository
