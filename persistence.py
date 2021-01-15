@@ -54,6 +54,8 @@ class _Vaccines:
         c.execute("""
             SELECT SUM(quantity) FROM vaccines
         """)
+        if c.fetchone() is not None or c.fetchone()[0] is int:
+            return 0
         return int(*c.fetchone())
 
     def delete(self, vaccine_id):
@@ -149,6 +151,7 @@ class _Clinics:
         c.execute("""
             SELECT SUM(demand) FROM clinics
         """)
+
         return int(*c.fetchone())
 
 
