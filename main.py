@@ -47,12 +47,17 @@ def read_orders_file(orders_path, output_path):
                 print("Receive Shipment")
                 name, amount, date = curr_line[0], int(curr_line[1]), curr_line[2]
                 supplier_id = repo.suppliers.get_id(name)
-                logistic_id = repo.suppliers.get_logistic(name)
+                logistic_id = repo.suppliers.get_logistic_by_name(name)
                 repo.vaccines.insert(Vaccine(0, date, supplier_id, amount))
                 repo.logistics.increase_count_received(logistic_id, amount)
                 update_output(output_path)
             elif len(curr_line) == 2:  # Send Shipment
                 location, amount = curr_line[0], int(curr_line[1])
+                actual_amount, suppliers = repo.vaccines.take(amount)
+                for supplier, quantity in suppliers:
+                    logistic = repo.suppliers.get_logistic_by_id(supplier)
+                    repo.logistics.increase_count_send(logistic, quantity)
+                repo.clinics.lower_demand(location, actual_amount)
                 print("Send Shipment")
                 update_output(output_path)
             else:

@@ -24,26 +24,30 @@ class _Vaccines:
 
         return Vaccine(*c.fetchone())
 
-    def take(self, vaccine_id, amount):
+    def take(self, amount):
+        suppliers = []
         c = self._conn.cursor()
         c.execute("""
-            SELECT quantity FROM vaccines WHERE id = ?
-        """, [vaccine_id])
-        curr_quantity = int(*c.fetchone())
-        amount = min(curr_quantity, amount)
-        if curr_quantity > amount:
-            self._conn.execute("""
-                    UPDATE vaccines 
-                    SET quantity = quantity - ?
-                    WHERE id = ?
-               """, [amount, vaccine_id])
-        else:
-            self._conn.execute("""
-                    DELETE FROM vaccines 
-                    WHERE id = ?
-               """, [amount, vaccine_id])
+            SELECT * FROM vaccines ORDER BY date
+        """, )
 
-        return amount
+        vaccines = [Vaccine(*entry) for entry in c.fetchall()]
+        ind = 0
+        left = amount
+        while left >= 0 and ind < len(vaccines):
+            current = vaccines[ind]
+            quantity = current.quantity
+            if quantity <= left:
+                self.delete(current.id)
+                left -= quantity
+            else:
+                quantity -= left
+                left = 0
+                self.update_quantity(current.id, quantity)
+            suppliers.append((current.supplier, quantity))
+            ind += 1
+
+        return amount-left, suppliers
 
     def total_inventory(self):
         c = self._conn.cursor()
@@ -51,6 +55,20 @@ class _Vaccines:
             SELECT SUM(quantity) FROM vaccines
         """)
         return int(*c.fetchone())
+
+    def delete(self, vaccine_id):
+        c = self._conn.cursor()
+        c.execute("""
+            DELETE FROM vaccines WHERE id = ?
+        """, [vaccine_id])
+
+    def update_quantity(self, vaccine_id, quantity):
+        c = self._conn.cursor()
+        self._conn.execute("""
+                UPDATE vaccines 
+                SET quantity = ?
+                WHERE id = ?
+           """, [quantity, vaccine_id])
 
 
 class _Suppliers:
@@ -78,11 +96,19 @@ class _Suppliers:
 
         return int(*c.fetchone())
 
-    def get_logistic(self, name):
+    def get_logistic_by_name(self, name):
         c = self._conn.cursor()
         c.execute("""
                 SELECT logistic FROM suppliers WHERE name = ?
             """, [name])
+
+        return str(*c.fetchone())
+
+    def get_logistic_by_id(self, supplier_id):
+        c = self._conn.cursor()
+        c.execute("""
+                SELECT logistic FROM suppliers WHERE id = ?
+            """, [supplier_id])
 
         return str(*c.fetchone())
 
@@ -105,11 +131,18 @@ class _Clinics:
         return Clinic(*c.fetchone())
 
     def lower_demand(self, location, amount):
+        c = self._conn.cursor()
+        c.execute("""
+            SELECT demand FROM clinics WHERE location = ?
+        """, [location])
+        curr_demand = int(*c.fetchone())
+        new_demand = max(curr_demand - amount, 0)
+
         self._conn.execute("""
                 UPDATE clinics 
-                SET demand = demand - ?
+                SET demand = ?
                 WHERE location = ?
-           """, [amount, location])
+           """, [new_demand, location])
 
     def total_demand(self):
         c = self._conn.cursor()
@@ -143,12 +176,12 @@ class _Logistics:
                 WHERE id = (?)
            """, [amount, logistic_id])
 
-    def increase_count_send(self, name, amount):
+    def increase_count_send(self, logistic_id, amount):
         self._conn.execute("""
                 UPDATE logistics 
                 SET count_sent = count_sent + (?)
-                WHERE name = (?)
-           """, [amount, name])
+                WHERE id = (?)
+           """, [amount, logistic_id])
 
     def total_received(self):
         c = self._conn.cursor()
