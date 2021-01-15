@@ -11,7 +11,7 @@ class _Vaccines:
 
     def insert(self, vaccine):
         self._conn.execute("""
-               INSERT INTO vaccines (id, date, supplier, quantity) VALUES (?, ?)
+               INSERT INTO vaccines (id, date, supplier, quantity) VALUES (?, ?, ?, ?)
            """, [vaccine.id, vaccine.date, vaccine.supplier, vaccine.quantity])
 
     def find(self, vaccine_id):
@@ -29,7 +29,7 @@ class _Suppliers:
 
     def insert(self, supplier):
         self._conn.execute("""
-                INSERT INTO suppliers (id, name, logistic) VALUES (?, ?)
+                INSERT INTO suppliers (id, name, logistic) VALUES (?, ?, ?)
         """, [supplier.id, supplier.name, supplier.logistic])
 
     def find(self, supplier_id):
@@ -47,7 +47,7 @@ class _Clinics:
 
     def insert(self, clinic):
         self._conn.execute("""
-            INSERT INTO clinics (id, location, demand, logistic) VALUES (?, ?, ?)
+            INSERT INTO clinics (id, location, demand, logistic) VALUES (?, ?, ?, ?)
         """, [clinic.id, clinic.location, clinic.demand, clinic.logistic])
 
     def find(self, clinic_id):
@@ -65,7 +65,7 @@ class _Logistics:
 
     def insert(self, logistic):
         self._conn.execute("""
-            INSERT INTO logistics (id, name, count_sent, count_received) VALUES (?, ?, ?)
+            INSERT INTO logistics (id, name, count_sent, count_received) VALUES (?, ?, ?, ?)
         """, [logistic.id, logistic.name, logistic.count_sent, logistic.count_received])
 
     def find(self, logistic_id):
@@ -96,7 +96,7 @@ class _Repository:
             id         INT         PRIMARY KEY,
             date       DATE        NOT NULL,
             supplier   INT,
-            quantity   INT         NOT NULL
+            quantity   INT         NOT NULL,
             
             FOREIGN KEY(supplier)     REFERENCES suppliers(id)
         );
