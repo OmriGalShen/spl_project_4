@@ -37,6 +37,8 @@ def read_orders_file(path):
             if len(curr_line) == 3:  # Receive Shipment
                 print("Receive Shipment")
                 name, amount, date = curr_line[0], int(curr_line[1]), curr_line[2]
+                # repo.vaccines.insert(Vaccine(-1, date, name, amount))
+                # repo.logistics.increase_count_received(name,amount)
             elif len(curr_line) == 2:  # Send Shipment
                 location, amount = curr_line[0], int(curr_line[1])
                 print("Send Shipment")
@@ -59,6 +61,12 @@ if __name__ == '__main__':
     repo.create_tables()
     read_config_file(config_path)
     read_orders_file(order_path)
+    # print(f"current: {repo.vaccines.find(1).quantity}")
+    # repo.vaccines.take(1, 20)
+    # print(f"current: {repo.vaccines.find(1).quantity}")
+    # repo.vaccines.add(1, 30)
+    # print(f"current: {repo.vaccines.find(1).quantity}")
+
     write_output_file(output_path, [1, 1, 1, 1])
     write_output_file(output_path, [1, 2, 3, 4])
     write_output_file(output_path, [5, 6, 7, 8])
