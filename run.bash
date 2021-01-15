@@ -1,1 +1,1 @@
-python3 main.py config.txt orders.txt ouput.txt
+python3 main.py config.txt orders.txt output.txt
