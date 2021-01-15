@@ -32,20 +32,18 @@ class _Vaccines:
         """, )
 
         vaccines = [Vaccine(*entry) for entry in c.fetchall()]
-        ind = 0
         left = amount
-        while left > 0 and ind < len(vaccines):
-            current = vaccines[ind]
-            quantity = current.quantity
+        for vaccine in vaccines:
+            quantity = vaccine.quantity
             if quantity <= left:
-                self.delete(current.id)
+                self.delete(vaccine.id)
                 left -= quantity
+                suppliers.append((vaccine.supplier, quantity))
             else:
-                quantity -= left
+                self.update_quantity(vaccine.id, quantity-left)
+                suppliers.append((vaccine.supplier, left))
                 left = 0
-                self.update_quantity(current.id, quantity)
-            suppliers.append((current.supplier, quantity))
-            ind += 1
+                break
 
         return amount-left, suppliers
 
@@ -55,7 +53,7 @@ class _Vaccines:
             SELECT SUM(quantity) FROM vaccines
         """)
         temp = c.fetchone()
-        if temp is None or temp[0] is not int:
+        if temp[0] is None:
             return 0
         return int(*temp)
 
