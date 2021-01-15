@@ -63,6 +63,14 @@ class _Suppliers:
 
         return Supplier(*c.fetchone())
 
+    def getID(self, name):
+        c = self._conn.cursor()
+        c.execute("""
+                SELECT id FROM suppliers WHERE name = ?
+            """, [name])
+
+        return int(*c.fetchone())
+
 
 class _Clinics:
     def __init__(self, conn):
