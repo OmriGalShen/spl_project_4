@@ -26,14 +26,45 @@ def compare_logstics(db_true,db_tested):
     true_db = db_true.execute("""SELECT log.name, log.count_sent, log.count_received FROM logistics as log""").fetchall()
     tested_db = db_tested.execute("""SELECT log.name, log.count_sent, log.count_received FROM logistics as log""").fetchall()
     return compare(true_db,tested_db,'logistics')
-    
+
+def swap_seperators(lst):
+    '''
+    lst is either a list of lists or a list of tuples.
+    will return a list/tuple where all − occurrences been replaced with - .
+    '''
+    for j,l in enumerate(lst):
+        nl = list(l)
+        for i,v in enumerate(nl):
+            if isinstance(v,str):
+                nl[i] = v.replace('−','-').strip('\n')
+        lst[j] = nl if isinstance(l,list) else tuple(nl)
+    return lst
+
+
+def fix_dates(lst):
+    '''
+    lst is either a list of lists or a list of tuples.
+    will return a list/tuple where a dates of YYYY-MM-D been replaced with YYYY-MM-DD
+    '''
+    for j,l in enumerate(lst):
+        nl = list(l)
+        for i,v in enumerate(nl):
+            if isinstance(v,str) and v.count('-') == 2:
+                v = v.split('-')
+                v[-1] = '0'+v[-1] if len(v[-1]) == 1 else v[-1]
+                nl[i] = '-'.join(v)
+        lst[j] = nl if isinstance(l,list) else tuple(nl)
+    return lst
+
 def compare_vaccines(db_true,db_tested):
     true_db = db_true.execute("""SELECT vac.date, vac.quantity, sup.name FROM vaccines as vac
         JOIN suppliers as sup
         on vac.supplier = sup.id""").fetchall()
-    tested_db = db_true.execute("""SELECT vac.date, vac.quantity, sup.name FROM vaccines as vac
+    true_db = fix_dates(swap_seperators(true_db))
+    tested_db = db_tested.execute("""SELECT vac.date, vac.quantity, sup.name FROM vaccines as vac
         JOIN suppliers as sup
         on vac.supplier = sup.id""").fetchall()
+    tested_db = fix_dates(swap_seperators(tested_db))
     return compare(true_db,tested_db,'vaccines')
 
 def compare_clinics(db_true,db_tested):

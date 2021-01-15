@@ -1,5 +1,5 @@
 from persistence import repo
-import dbtools
+import dto
 
 import os
 import imp
@@ -18,7 +18,7 @@ def grade(assignments_dir, assignment_num):
 
         code = imp.load_source('test', assignments_dir + '/' + assignment)
 
-        student_grade = dbtools.Grade(student_id, assignment_num, 0)
+        student_grade = dto.Grade(student_id, assignment_num, 0)
         if code.run_assignment() == expected_output:
             student_grade.grade = 100
 
