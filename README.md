@@ -16,8 +16,7 @@ pip3 install numpy
 run "bash run.sh"
 
 ### How to test using wsl:  
-Run program. Copy 'database.db' and 'output.txt' to 'tests' folder  
-There are the files being tested!  
+Run program with config and orders from the files in tests folder
 open wsl in 'tests' folder and run "bash tests.sh"
 
 ### How to check database currrent state?
