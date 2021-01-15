@@ -1,1 +1,1 @@
-python3 compare_output.py true_output.txt tested_output.txt db_true.db db_tested.db
+python3 compare_output.py true_output.txt output.txt db_true.db database.db
