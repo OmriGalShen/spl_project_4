@@ -55,7 +55,9 @@ class _Vaccines:
             SELECT SUM(quantity) FROM vaccines
         """)
         temp = c.fetchone()
-        return 0 if temp is None else int(*temp)
+        if temp is None or temp[0] is not int:
+            return 0
+        return int(*temp)
 
     def delete(self, vaccine_id):
         c = self._conn.cursor()
