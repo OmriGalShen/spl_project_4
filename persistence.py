@@ -11,8 +11,8 @@ class _Vaccines:
 
     def insert(self, vaccine):
         self._conn.execute("""
-               INSERT INTO vaccines (id, date, supplier, quantity) VALUES (?, ?, ?, ?)
-           """, [vaccine.id, vaccine.date, vaccine.supplier, vaccine.quantity])
+               INSERT INTO vaccines (date, supplier, quantity) VALUES (?, ?, ?)
+           """, [vaccine.date, vaccine.supplier, vaccine.quantity])
 
     def find(self, vaccine_id):
         c = self._conn.cursor()
@@ -21,6 +21,27 @@ class _Vaccines:
         """, [vaccine_id])
 
         return Vaccine(*c.fetchone())
+
+    def take(self, vaccine_id, amount):
+        c = self._conn.cursor()
+        c.execute("""
+            SELECT quantity FROM vaccines WHERE id = ?
+        """, [vaccine_id])
+        curr_quantity = int(*c.fetchone())
+        amount = min(curr_quantity, amount)
+        if curr_quantity>amount:
+            self._conn.execute("""
+                    UPDATE vaccines 
+                    SET quantity = quantity - ?
+                    WHERE id = ?
+               """, [amount, vaccine_id])
+        else:
+            self._conn.execute("""
+                    DELETE FROM vaccines 
+                    WHERE id = ?
+               """, [amount, vaccine_id])
+
+        return amount
 
 
 class _Suppliers:
@@ -58,6 +79,13 @@ class _Clinics:
 
         return Clinic(*c.fetchone())
 
+    def lower_demand(self, location, amount):
+        self._conn.execute("""
+                UPDATE clinics 
+                SET demand = demand - ?
+                WHERE location = ?
+           """, [amount, location])
+
 
 class _Logistics:
     def __init__(self, conn):
@@ -75,6 +103,20 @@ class _Logistics:
             """, [logistic_id])
 
         return Logistic(*c.fetchone())
+
+    def increase_count_received(self, name, amount):
+        self._conn.execute("""
+                UPDATE logistics 
+                SET count_received = count_received + (?)
+                WHERE name = (?)
+           """, [amount, name])
+
+    def increase_count_send(self, name, amount):
+        self._conn.execute("""
+                UPDATE logistics 
+                SET count_sent = count_sent + (?)
+                WHERE name = (?)
+           """, [amount, name])
 
 
 # The Repository
