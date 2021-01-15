@@ -8,11 +8,13 @@ from dto import *
 class _Vaccines:
     def __init__(self, conn):
         self._conn = conn
+        self.counter = 1
 
     def insert(self, vaccine):
         self._conn.execute("""
-               INSERT INTO vaccines (date, supplier, quantity) VALUES (?, ?, ?)
-           """, [vaccine.date, vaccine.supplier, vaccine.quantity])
+               INSERT INTO vaccines (id, date, supplier, quantity) VALUES (?, ?, ?, ?)
+           """, [self.counter, vaccine.date, vaccine.supplier, vaccine.quantity])
+        self.counter += 1
 
     def find(self, vaccine_id):
         c = self._conn.cursor()
@@ -29,7 +31,7 @@ class _Vaccines:
         """, [vaccine_id])
         curr_quantity = int(*c.fetchone())
         amount = min(curr_quantity, amount)
-        if curr_quantity>amount:
+        if curr_quantity > amount:
             self._conn.execute("""
                     UPDATE vaccines 
                     SET quantity = quantity - ?
