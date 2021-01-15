@@ -34,7 +34,7 @@ class _Vaccines:
         vaccines = [Vaccine(*entry) for entry in c.fetchall()]
         ind = 0
         left = amount
-        while left >= 0 and ind < len(vaccines):
+        while left > 0 and ind < len(vaccines):
             current = vaccines[ind]
             quantity = current.quantity
             if quantity <= left:
