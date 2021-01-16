@@ -53,10 +53,9 @@ def read_orders_file(orders_path, output_path):
                 update_output(output_path)
             elif len(curr_line) == 2:  # Send Shipment
                 location, amount = curr_line[0], int(curr_line[1])
-                actual_amount, suppliers = repo.vaccines.take(amount)
-                for supplier, quantity in suppliers:
-                    logistic = repo.suppliers.get_logistic_by_id(supplier)
-                    repo.logistics.increase_count_send(logistic, quantity)
+                clinic = repo.clinics.find(location)
+                actual_amount = repo.vaccines.take(amount)
+                repo.logistics.increase_count_send(clinic.logistic, actual_amount)
                 repo.clinics.lower_demand(location, actual_amount)
                 print("Send Shipment")
                 update_output(output_path)

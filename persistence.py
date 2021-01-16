@@ -25,7 +25,6 @@ class _Vaccines:
         return Vaccine(*c.fetchone())
 
     def take(self, amount):
-        suppliers = []
         c = self._conn.cursor()
         c.execute("""
             SELECT * FROM vaccines ORDER BY date
@@ -38,14 +37,12 @@ class _Vaccines:
             if quantity <= left:
                 self.delete(vaccine.id)
                 left -= quantity
-                suppliers.append((vaccine.supplier, quantity))
             else:
                 self.update_quantity(vaccine.id, quantity-left)
-                suppliers.append((vaccine.supplier, left))
                 left = 0
                 break
 
-        return amount-left, suppliers
+        return amount-left
 
     def total_inventory(self):
         c = self._conn.cursor()
@@ -105,14 +102,6 @@ class _Suppliers:
 
         return str(*c.fetchone())
 
-    def get_logistic_by_id(self, supplier_id):
-        c = self._conn.cursor()
-        c.execute("""
-                SELECT logistic FROM suppliers WHERE id = ?
-            """, [supplier_id])
-
-        return str(*c.fetchone())
-
 
 class _Clinics:
     def __init__(self, conn):
@@ -123,11 +112,11 @@ class _Clinics:
             INSERT INTO clinics (id, location, demand, logistic) VALUES (?, ?, ?, ?)
         """, [clinic.id, clinic.location, clinic.demand, clinic.logistic])
 
-    def find(self, clinic_id):
+    def find(self, location):
         c = self._conn.cursor()
         c.execute("""
-                SELECT id, location, demand, logistic FROM clinics WHERE id = ?
-            """, [clinic_id])
+                SELECT id, location, demand, logistic FROM clinics WHERE location = ?
+            """, [location])
 
         return Clinic(*c.fetchone())
 
@@ -152,6 +141,14 @@ class _Clinics:
         """)
 
         return int(*c.fetchone())
+
+    def get_supplier(self, clinic_id):
+        c = self._conn.cursor()
+        c.execute("""
+                SELECT logistic FROM clinics WHERE id = ?
+            """, [clinic_id])
+
+        return str(*c.fetchone())
 
 
 class _Logistics:
