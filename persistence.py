@@ -142,14 +142,6 @@ class _Clinics:
 
         return int(*c.fetchone())
 
-    def get_supplier(self, clinic_id):
-        c = self._conn.cursor()
-        c.execute("""
-                SELECT logistic FROM clinics WHERE id = ?
-            """, [clinic_id])
-
-        return str(*c.fetchone())
-
 
 class _Logistics:
     def __init__(self, conn):
