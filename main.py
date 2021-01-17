@@ -1,5 +1,3 @@
-import os
-
 from persistence import repo
 from dto import Vaccine, Supplier, Clinic, Logistic
 import sys
@@ -44,7 +42,6 @@ def read_orders_file(orders_path, output_path):
         for line in orders_file:
             curr_line = line.split(',')
             if len(curr_line) == 3:  # Receive Shipment
-                print("Receive Shipment")
                 name, amount, date = curr_line[0], int(curr_line[1]), curr_line[2]
                 supplier_id = repo.suppliers.get_id(name)
                 logistic_id = repo.suppliers.get_logistic_by_name(name)
@@ -57,7 +54,6 @@ def read_orders_file(orders_path, output_path):
                 actual_amount = repo.vaccines.take(amount)
                 repo.logistics.increase_count_send(clinic.logistic, actual_amount)
                 repo.clinics.lower_demand(location, actual_amount)
-                print("Send Shipment")
                 update_output(output_path)
             else:
                 continue
